@@ -10,22 +10,37 @@
   [cipher message]
   (let [cipher-len (count cipher)
         msg-len (count message)
-        to-take (Math/ceil (/ msg-len cipher-len))]
-    (take msg-len (apply concat (take to-take (repeat cipher))))))
+        to-take (Math/ceil (/ msg-len cipher-len))
+        taken (take to-take (repeat cipher))]
+    (apply str (take msg-len (apply concat taken)))))
 
-(defn- encode-letters [k m]
+(defn- encode-pair
+  "Encode single-letter (m)essage given (k)ey."
+  [k m]
   (let [offset 97 ;; letter 'a' offset
         index (- (int k) offset)
         split-pos (- (int m) offset)]
-    (nth (apply concat (reverse (split-at split-pos letters))) index)
-    ;;[k index]
-    ))
+    (nth (apply concat (reverse (split-at split-pos letters))) index)))
 
-(defn encode [keyword message]
-  (let [cipher (apply str (full-cipher keyword message))
+(defn encode
+  "Encode a message with given keyword."
+  [keyword message]
+  (let [cipher (full-cipher keyword message)
         msg (str/lower-case message)]
-    (apply str (map encode-letters cipher msg))))
+    (apply str (map encode-pair cipher msg))))
 
-(defn decode [keyword message]
-  "decodeme")
+(defn decode
+  "Decode encoded message with given keyword."
+  [keyword message]
+  (let [cipher (full-cipher keyword message)]
+    (apply str (map decode-pair cipher message))))
 
+(defn- decode-pair
+  "Decode pair takes a different approach than encode-pair: mod is
+  used instead of cipher generation."
+  [k m]
+  (let [offset 97
+        kval (- (int k) offset)
+        mval (- (int m) offset)
+        res (mod (- mval kval) (count letters))]
+    (char (+ offset res))))
