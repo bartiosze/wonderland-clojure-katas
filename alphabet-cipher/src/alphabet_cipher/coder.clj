@@ -5,15 +5,6 @@
   "Alphabet used later on for decoding/encoding of the message"
   (map char (range (int \a) (inc (int \z)))))
 
-(defn full-cipher
-  "Return full cipher - cipher repeated till message length is met."
-  [cipher message]
-  (let [cipher-len (count cipher)
-        msg-len (count message)
-        to-take (Math/ceil (/ msg-len cipher-len))
-        taken (take to-take (repeat cipher))]
-    (apply str (take msg-len (apply concat taken)))))
-
 (defn- encode-pair
   "Encode single-letter (m)essage given (k)ey."
   [k m]
@@ -25,9 +16,7 @@
 (defn encode
   "Encode a message with given keyword."
   [keyword message]
-  (let [cipher (full-cipher keyword message)
-        msg (str/lower-case message)]
-    (apply str (map encode-pair cipher msg))))
+  (apply str (map encode-pair (cycle keyword) message)))
 
 (defn decode
   "Decode encoded message with given keyword."
